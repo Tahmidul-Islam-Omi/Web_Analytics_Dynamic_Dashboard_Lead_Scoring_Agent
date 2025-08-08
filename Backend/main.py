@@ -15,8 +15,20 @@ app.add_middleware(
 async def read_root():
     return {"Hello": "World"}
 
+# @app.post("/api/track")
+# async def receive_tracking(request: Request):
+#     data = await request.json()
+#     print("Received tracking data:", data)
+#     return {"status": "success"}
 @app.post("/api/track")
 async def receive_tracking(request: Request):
     data = await request.json()
-    print("Received tracking data:", data)
+
+    print("\n=== 📊 Page Analytics ===")
+    print(f"👁 Page Views    : {data.get('pageViews')}")
+    print(f"🖥 Browser       : {data.get('browser')}")
+    print(f"💻 OS            : {data.get('os')}")
+    print(f"⏱ Duration (sec): {data.get('sessionDuration')}")
+    print("=========================\n")
+
     return {"status": "success"}
