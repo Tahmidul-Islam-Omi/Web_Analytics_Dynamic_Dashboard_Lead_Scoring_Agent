@@ -1,0 +1,63 @@
+-- Table: websites
+-- Stores each tracked website
+CREATE TABLE websites (
+    website_id SERIAL PRIMARY KEY,
+    site_id VARCHAR(50) NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL UNIQUE, -- e.g. "https://example.com"
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Table: sessions
+-- Tracks each user's visit to a site
+CREATE TABLE sessions (
+    session_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    website_id INT REFERENCES websites(website_id) ON DELETE CASCADE,
+    browser TEXT NOT NULL,
+    os TEXT NOT NULL,
+    start_time TIMESTAMP NOT NULL DEFAULT NOW(),
+    end_time TIMESTAMP,
+    session_duration INTERVAL,
+    ip_address INET,
+    user_agent TEXT
+);
+
+-- Table: pages
+-- Stores metadata about each page of a website
+CREATE TABLE pages (
+    page_id SERIAL PRIMARY KEY,
+    website_id INT REFERENCES websites(website_id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    title TEXT,
+    UNIQUE(website_id, url) -- same URL allowed for different websites
+);
+
+-- Table: page_views
+CREATE TABLE page_views (
+    view_id BIGSERIAL PRIMARY KEY,
+    session_id UUID REFERENCES sessions(session_id) ON DELETE CASCADE,
+    page_id INT REFERENCES pages(page_id) ON DELETE CASCADE,
+    view_time TIMESTAMP NOT NULL DEFAULT NOW(),
+    referrer TEXT
+);
+
+-- Table: click_events
+CREATE TABLE click_events (
+    click_id BIGSERIAL PRIMARY KEY,
+    session_id UUID REFERENCES sessions(session_id) ON DELETE CASCADE,
+    page_id INT REFERENCES pages(page_id) ON DELETE CASCADE,
+    element_selector TEXT NOT NULL,
+    element_text TEXT,
+    click_time TIMESTAMP NOT NULL DEFAULT NOW(),
+    x_coord INT,
+    y_coord INT
+);
+
+-- Table: scroll_depth
+CREATE TABLE scroll_depth (
+    scroll_id BIGSERIAL PRIMARY KEY,
+    session_id UUID REFERENCES sessions(session_id) ON DELETE CASCADE,
+    page_id INT REFERENCES pages(page_id) ON DELETE CASCADE,
+    depth_percent INT NOT NULL CHECK (depth_percent >= 0 AND depth_percent <= 100),
+    recorded_time TIMESTAMP NOT NULL DEFAULT NOW()
+);

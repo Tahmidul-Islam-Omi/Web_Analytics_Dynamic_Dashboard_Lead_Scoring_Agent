@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from config.database import db_manager
+from routers.websites import router as websites_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -43,6 +44,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(websites_router)
 
 @app.get("/")
 async def read_root():

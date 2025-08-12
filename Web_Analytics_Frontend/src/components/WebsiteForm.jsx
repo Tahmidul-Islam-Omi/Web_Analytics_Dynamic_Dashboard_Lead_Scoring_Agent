@@ -38,6 +38,7 @@ const WebsiteForm = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [actualSiteId, setActualSiteId] = useState('');
 
   const handleUrlChange = (e) => {
     const url = e.target.value;
@@ -103,25 +104,44 @@ const WebsiteForm = () => {
       // Generate clean site ID
       const siteId = generateSiteId(siteName.trim());
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      console.log('Website added:', {
-        url: formattedUrl,
-        name: siteName.trim(),
-        siteId: siteId,
-        domain: extractDomain(formattedUrl),
-        timestamp: new Date().toISOString()
+      // Call backend API
+      const response = await fetch('http://127.0.0.1:8000/api/websites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: siteName.trim(),
+          url: formattedUrl,
+          site_id: siteId
+        })
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to add website');
+      }
+
+      const result = await response.json();
+      console.log('Website added successfully:', result);
+
+      // Store the actual site ID from the backend response
+      if (result.website && result.website.site_id) {
+        setActualSiteId(result.website.site_id);
+      }
 
       setSuccess(true);
       setWebsiteUrl('');
       setSiteName('');
 
-      // Reset success message after 3 seconds
-      setTimeout(() => setSuccess(false), 3000);
+      // Reset success message after 5 seconds (longer to see the tracking code)
+      setTimeout(() => {
+        setSuccess(false);
+        setActualSiteId(''); // Clear the site ID when hiding success
+      }, 5000);
     } catch (err) {
-      setError(ERROR_MESSAGES.NETWORK_ERROR);
+      console.error('Error adding website:', err);
+      setError(err.message || ERROR_MESSAGES.NETWORK_ERROR);
     } finally {
       setIsLoading(false);
     }
@@ -229,65 +249,67 @@ const WebsiteForm = () => {
                 </Button>
               </Box>
 
-              {/* Tracking Code Preview */}
-              <Box sx={{ mt: 4, p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Code sx={{ mr: 1, color: 'primary.main' }} />
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      Tracking Code Preview
-                    </Typography>
-                  </Box>
-                  <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'}>
-                    <Button
-                      size="small"
-                      startIcon={<ContentCopy />}
-                      onClick={() => copyToClipboard(`<script 
+              {/* Tracking Code - Only show after successful website creation */}
+              {actualSiteId && (
+                <Box sx={{ mt: 4, p: 3, bgcolor: 'success.light', borderRadius: 2, border: '1px solid', borderColor: 'success.main' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Code sx={{ mr: 1, color: 'success.dark' }} />
+                      <Typography variant="h6" sx={{ fontWeight: 600, color: 'success.dark' }}>
+                        Your Tracking Code
+                      </Typography>
+                    </Box>
+                    <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'}>
+                      <Button
+                        size="small"
+                        startIcon={<ContentCopy />}
+                        onClick={() => copyToClipboard(`<script 
   src="${TRACKING_SCRIPT_URL}" 
-  data-site-id="${siteName ? generateSiteId(siteName) : 'your-site-id'}"
+  data-site-id="${actualSiteId}"
   async>
 </script>`)}
+                        sx={{
+                          textTransform: 'none',
+                          color: copied ? 'success.main' : 'success.dark',
+                          bgcolor: 'white',
+                          '&:hover': { bgcolor: 'grey.100' }
+                        }}
+                      >
+                        {copied ? 'Copied!' : 'Copy'}
+                      </Button>
+                    </Tooltip>
+                  </Box>
+                  <Typography variant="body2" color="success.dark" sx={{ mb: 2 }}>
+                    Add this code to your website's HTML head section:
+                  </Typography>
+                  <Paper sx={{ p: 2, bgcolor: '#1e1e1e', borderRadius: 1, position: 'relative' }}>
+                    <Typography
+                      variant="body2"
+                      component="pre"
                       sx={{
-                        textTransform: 'none',
-                        color: copied ? 'success.main' : 'primary.main'
+                        color: '#e6e6e6',
+                        fontFamily: 'Monaco, Consolas, monospace',
+                        fontSize: '0.85rem',
+                        margin: 0,
+                        whiteSpace: 'pre-wrap'
                       }}
                     >
-                      {copied ? 'Copied!' : 'Copy'}
-                    </Button>
-                  </Tooltip>
-                </Box>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Add this code to your website's HTML head section:
-                </Typography>
-                <Paper sx={{ p: 2, bgcolor: '#1e1e1e', borderRadius: 1, position: 'relative' }}>
-                  <Typography
-                    variant="body2"
-                    component="pre"
-                    sx={{
-                      color: '#e6e6e6',
-                      fontFamily: 'Monaco, Consolas, monospace',
-                      fontSize: '0.85rem',
-                      margin: 0,
-                      whiteSpace: 'pre-wrap'
-                    }}
-                  >
-                    {`<script 
+                      {`<script 
   src="${TRACKING_SCRIPT_URL}" 
-  data-site-id="${siteName ? generateSiteId(siteName) : 'your-site-id'}"
+  data-site-id="${actualSiteId}"
   async>
 </script>`}
-                  </Typography>
-                </Paper>
+                    </Typography>
+                  </Paper>
 
-                {siteName && (
                   <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-                    <Info sx={{ fontSize: 16, color: 'info.main', mr: 1 }} />
-                    <Typography variant="caption" color="text.secondary">
-                      Your site ID: <strong>{generateSiteId(siteName)}</strong>
+                    <Info sx={{ fontSize: 16, color: 'success.dark', mr: 1 }} />
+                    <Typography variant="caption" color="success.dark">
+                      Your site ID: <strong>{actualSiteId}</strong>
                     </Typography>
                   </Box>
-                )}
-              </Box>
+                </Box>
+              )}
             </Paper>
           </Grid>
 
