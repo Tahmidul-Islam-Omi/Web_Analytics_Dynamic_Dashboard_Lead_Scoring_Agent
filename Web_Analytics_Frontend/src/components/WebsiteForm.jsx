@@ -62,6 +62,16 @@ const WebsiteForm = () => {
     }
   };
 
+  // Generate clean site ID from site name
+  const generateSiteId = (name) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')  // Remove special characters
+      .replace(/\s+/g, '-')         // Replace spaces with dashes
+      .replace(/^-+|-+$/g, '')      // Remove leading/trailing dashes
+      .substring(0, 30);            // Limit length
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -90,12 +100,16 @@ const WebsiteForm = () => {
     setError('');
 
     try {
+      // Generate clean site ID
+      const siteId = generateSiteId(siteName.trim());
+
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       console.log('Website added:', {
         url: formattedUrl,
         name: siteName.trim(),
+        siteId: siteId,
         domain: extractDomain(formattedUrl),
         timestamp: new Date().toISOString()
       });
@@ -229,10 +243,10 @@ const WebsiteForm = () => {
                       size="small"
                       startIcon={<ContentCopy />}
                       onClick={() => copyToClipboard(`<script 
-                      src="${TRACKING_SCRIPT_URL}" 
-                      data-site-id="${siteName || 'your-site-name'}"
-                        async>
-                    </script>`)}
+  src="${TRACKING_SCRIPT_URL}" 
+  data-site-id="${siteName ? generateSiteId(siteName) : 'your-site-id'}"
+  async>
+</script>`)}
                       sx={{
                         textTransform: 'none',
                         color: copied ? 'success.main' : 'primary.main'
@@ -259,7 +273,7 @@ const WebsiteForm = () => {
                   >
                     {`<script 
   src="${TRACKING_SCRIPT_URL}" 
-  data-site-id="${siteName || 'your-site-name'}"
+  data-site-id="${siteName ? generateSiteId(siteName) : 'your-site-id'}"
   async>
 </script>`}
                   </Typography>
@@ -269,7 +283,7 @@ const WebsiteForm = () => {
                   <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
                     <Info sx={{ fontSize: 16, color: 'info.main', mr: 1 }} />
                     <Typography variant="caption" color="text.secondary">
-                      Your site ID: <strong>{siteName}</strong>
+                      Your site ID: <strong>{generateSiteId(siteName)}</strong>
                     </Typography>
                   </Box>
                 )}
