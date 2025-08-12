@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from config.database import db_manager
 from routers.websites import router as websites_router
+from routers.sessions import router as sessions_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -47,6 +48,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(websites_router)
+app.include_router(sessions_router)
 
 @app.get("/")
 async def read_root():
@@ -68,20 +70,7 @@ async def health_check():
             "error": str(e)
         }
 
-@app.post("/api/track")
-async def receive_tracking(request: Request):
-    data = await request.json()
 
-    print("\n=== 📊 Page Analytics ===")
-    print(f"👁 Page Views    : {data.get('pageViews')}")
-    print(f"🖥 Browser       : {data.get('browser')}")
-    print(f"💻 OS            : {data.get('os')}")
-    print(f"⏱ Duration (sec): {data.get('sessionDuration')}")
-    print("=========================\n")
-
-    # Here you can add database operations to store the analytics data
-    # For now, just return success
-    return {"status": "success", "message": "Data received successfully"}
 
 if __name__ == "__main__":
     import uvicorn

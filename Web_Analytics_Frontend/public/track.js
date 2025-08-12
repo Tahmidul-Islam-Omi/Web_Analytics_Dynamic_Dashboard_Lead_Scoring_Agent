@@ -46,32 +46,65 @@
       os = "iOS";
     }
 
-    // Prepare tracking data
-    const data = {
-      siteId,
-      url: window.location.href,
-      pageViews: 1, // Always send 1, backend increments
-      referrer: document.referrer,
-      userAgent,
-      browser,
-      os,
-      sessionStart: new Date(sessionStart).toISOString(),
-      sessionDuration, // in seconds
-      timestamp: new Date().toISOString(),
+    // Generate or get session ID
+    let sessionId = sessionStorage.getItem("sessionId");
+    if (!sessionId) {
+      // Generate new session ID (UUID-like format)
+      sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        const r = Math.random() * 16 | 0;
+        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+      sessionStorage.setItem("sessionId", sessionId);
+
+      // Start new session
+      const sessionData = {
+        siteId,
+        sessionId,
+        browser,
+        os,
+        userAgent,
+        action: "start"
+      };
+
+      fetch("http://127.0.0.1:8000/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sessionData),
+        keepalive: true,
+      }).catch((err) => {
+        console.warn("Session start tracking failed:", err);
+      });
+
+      console.log("New session started:", sessionId);
+    }
+
+    // Handle session end on page unload
+    const endSession = () => {
+      const endData = {
+        siteId,
+        sessionId,
+        sessionDuration,
+        action: "end"
+      };
+
+      fetch("http://127.0.0.1:8000/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(endData),
+        keepalive: true,
+      }).catch((err) => {
+        console.warn("Session end tracking failed:", err);
+      });
     };
 
-    // Send to backend
-    fetch("http://127.0.0.1:8000/api/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-      keepalive: true,
-    }).catch((err) => {
-      console.warn("Tracking request failed:", err);
+    // Listen for page unload to end session
+    window.addEventListener("beforeunload", endSession);
+    window.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
+        endSession();
+      }
     });
-
-    // Debug log
-    console.log("Page visit tracked:", data);
   } catch (error) {
     console.error("Error in tracking script:", error);
   }
