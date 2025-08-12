@@ -134,11 +134,11 @@ const WebsiteForm = () => {
       setWebsiteUrl('');
       setSiteName('');
 
-      // Reset success message after 5 seconds (longer to see the tracking code)
+      // Reset success message after 1 minute (longer to see the tracking code)
       setTimeout(() => {
         setSuccess(false);
         setActualSiteId(''); // Clear the site ID when hiding success
-      }, 5000);
+      }, 60000);
     } catch (err) {
       console.error('Error adding website:', err);
       setError(err.message || ERROR_MESSAGES.NETWORK_ERROR);
@@ -251,11 +251,11 @@ const WebsiteForm = () => {
 
               {/* Tracking Code - Only show after successful website creation */}
               {actualSiteId && (
-                <Box sx={{ mt: 4, p: 3, bgcolor: 'success.light', borderRadius: 2, border: '1px solid', borderColor: 'success.main' }}>
+                <Box sx={{ mt: 4, p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Code sx={{ mr: 1, color: 'success.dark' }} />
-                      <Typography variant="h6" sx={{ fontWeight: 600, color: 'success.dark' }}>
+                      <Code sx={{ mr: 1, color: 'primary.main' }} />
+                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
                         Your Tracking Code
                       </Typography>
                     </Box>
@@ -270,16 +270,14 @@ const WebsiteForm = () => {
 </script>`)}
                         sx={{
                           textTransform: 'none',
-                          color: copied ? 'success.main' : 'success.dark',
-                          bgcolor: 'white',
-                          '&:hover': { bgcolor: 'grey.100' }
+                          color: copied ? 'success.main' : 'primary.main'
                         }}
                       >
                         {copied ? 'Copied!' : 'Copy'}
                       </Button>
                     </Tooltip>
                   </Box>
-                  <Typography variant="body2" color="success.dark" sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     Add this code to your website's HTML head section:
                   </Typography>
                   <Paper sx={{ p: 2, bgcolor: '#1e1e1e', borderRadius: 1, position: 'relative' }}>
@@ -303,8 +301,8 @@ const WebsiteForm = () => {
                   </Paper>
 
                   <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-                    <Info sx={{ fontSize: 16, color: 'success.dark', mr: 1 }} />
-                    <Typography variant="caption" color="success.dark">
+                    <Info sx={{ fontSize: 16, color: 'info.main', mr: 1 }} />
+                    <Typography variant="caption" color="text.secondary">
                       Your site ID: <strong>{actualSiteId}</strong>
                     </Typography>
                   </Box>
