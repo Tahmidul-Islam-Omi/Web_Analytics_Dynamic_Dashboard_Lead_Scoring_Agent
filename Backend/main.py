@@ -24,7 +24,17 @@ async def lifespan(app: FastAPI):
         raise RuntimeError("Database connection test failed")
     
     print("✅ Web Analytics API started successfully!")
-    
+    pool = await db_manager.get_connection()
+    async with pool.acquire() as connection:                
+        rows = await connection.fetch(
+            """
+            SELECT * FROM websites;
+            """
+        )
+        print(f"✅ Fetched rows: {rows[0].website_id}")
+
+
+
     yield  # This is where the application runs
     
     # Shutdown
