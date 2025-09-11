@@ -21,7 +21,8 @@ class DatabaseManager:
                 self.database_url,
                 min_size=1,
                 max_size=10,
-                command_timeout=60
+                command_timeout=60,
+                statement_cache_size=0  # Disable prepared statement cache to avoid conflicts
             )
             print("✅ Database connection pool created successfully")
             return True
