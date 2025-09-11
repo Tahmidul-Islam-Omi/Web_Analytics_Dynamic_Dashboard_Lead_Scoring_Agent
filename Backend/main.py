@@ -4,6 +4,10 @@ from contextlib import asynccontextmanager
 from config.database import db_manager
 from routers.websites import router as websites_router
 from routers.sessions import router as sessions_router
+from routers.users import router as users_router
+from routers.page_views import router as page_views_router
+from routers.click_events import router as click_events_router
+from routers.lead_scoring import router as lead_scoring_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -49,6 +53,10 @@ app.add_middleware(
 # Include routers
 app.include_router(websites_router)
 app.include_router(sessions_router)
+app.include_router(users_router)
+app.include_router(page_views_router)
+app.include_router(click_events_router)
+app.include_router(lead_scoring_router)
 
 @app.get("/")
 async def read_root():

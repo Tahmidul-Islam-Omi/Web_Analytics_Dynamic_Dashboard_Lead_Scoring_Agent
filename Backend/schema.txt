@@ -13,13 +13,15 @@ CREATE TABLE websites (
 CREATE TABLE sessions (
     session_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     website_id INT REFERENCES websites(website_id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,  -- link session to user
     browser TEXT NOT NULL,
     os TEXT NOT NULL,
     start_time TIMESTAMP NOT NULL DEFAULT NOW(),
     end_time TIMESTAMP,
     session_duration INTERVAL,
     ip_address INET,
-    user_agent TEXT
+    user_agent TEXT,
+    lead_score INT DEFAULT 0 CHECK (lead_score >= 0 AND lead_score <= 100) -- session-level score
 );
 
 -- Table: pages
@@ -28,30 +30,35 @@ CREATE TABLE pages (
     page_id SERIAL PRIMARY KEY,
     website_id INT REFERENCES websites(website_id) ON DELETE CASCADE,
     url TEXT NOT NULL,
-    title TEXT,
-    UNIQUE(website_id, url) -- same URL allowed for different websites
+    title TEXT, UNIQUE(website_id, url) -- same URL allowed for different websites
 );
 
 -- Table: page_views
 CREATE TABLE page_views (
     view_id BIGSERIAL PRIMARY KEY,
     session_id UUID REFERENCES sessions(session_id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,  -- directly link to user
     page_id INT REFERENCES pages(page_id) ON DELETE CASCADE,
-    view_time TIMESTAMP NOT NULL DEFAULT NOW(),
+    view_start TIMESTAMP NOT NULL DEFAULT NOW(),
+    view_end TIMESTAMP,
+    duration INTERVAL GENERATED ALWAYS AS (view_end - view_start) STORED,
     referrer TEXT
 );
+
 
 -- Table: click_events
 CREATE TABLE click_events (
     click_id BIGSERIAL PRIMARY KEY,
     session_id UUID REFERENCES sessions(session_id) ON DELETE CASCADE,
-    page_id INT REFERENCES pages(page_id) ON DELETE CASCADE,
-    element_selector TEXT NOT NULL,
-    element_text TEXT,
-    click_time TIMESTAMP NOT NULL DEFAULT NOW(),
-    x_coord INT,
-    y_coord INT
+    user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,  -- direct link to user
+    page_id INT REFERENCES pages(page_id) ON DELETE CASCADE,   -- which "page" (or SPA section)
+    element_selector TEXT NOT NULL,   -- CSS selector to identify element
+    element_text TEXT,                -- visible text inside element (if any)
+    click_time TIMESTAMP NOT NULL DEFAULT NOW(),  -- when the click happened
+    x_coord INT,                      -- cursor X position (for heatmap)
+    y_coord INT                       -- cursor Y position (for heatmap)
 );
+
 
 -- Table: scroll_depth
 CREATE TABLE scroll_depth (
@@ -61,3 +68,15 @@ CREATE TABLE scroll_depth (
     depth_percent INT NOT NULL CHECK (depth_percent >= 0 AND depth_percent <= 100),
     recorded_time TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+-- New table for visitor identity (based on cookie UUID)
+CREATE TABLE users (
+    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    website_id INT REFERENCES websites(website_id) ON DELETE CASCADE,
+    visitor_uuid VARCHAR(50) NOT NULL,  -- matches cookie/localStorage ID
+    first_seen TIMESTAMP NOT NULL DEFAULT NOW(),
+    last_seen TIMESTAMP NOT NULL DEFAULT NOW(),
+    lead_score INT DEFAULT 0 CHECK (lead_score >= 0 AND lead_score <= 100),
+    UNIQUE (website_id, visitor_uuid)   -- same UUID only once per site
+);
+
