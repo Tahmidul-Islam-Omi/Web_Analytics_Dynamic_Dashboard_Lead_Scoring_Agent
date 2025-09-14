@@ -1,6 +1,6 @@
 import asyncpg
 import uuid
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from datetime import datetime
 from config.database import db_manager
 
@@ -49,6 +49,37 @@ class WebsiteService:
             print(f"❌ Error creating website: {e}")
             return None
     
+    @staticmethod
+    async def get_all_websites() -> List[Dict[str, Any]]:
+        """Get all websites for dropdown selection"""
+        try:
+            pool = await db_manager.get_connection()
+            async with pool.acquire() as connection:
+                results = await connection.fetch(
+                    """
+                    SELECT website_id, site_id, name, url, created_at 
+                    FROM websites 
+                    ORDER BY created_at DESC
+                    """
+                )
+                
+                websites = []
+                for result in results:
+                    websites.append({
+                        "website_id": result["website_id"],
+                        "site_id": result["site_id"],
+                        "name": result["name"],
+                        "url": result["url"],
+                        "created_at": result["created_at"],
+                        "status": "active"  # Default status, can be enhanced later
+                    })
+                
+                return websites
+                
+        except Exception as e:
+            print(f"❌ Error fetching all websites: {e}")
+            return []
+
     @staticmethod
     async def get_website_by_site_id(site_id: str) -> Optional[Dict[str, Any]]:
         """Get website by site_id"""

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Container, Box, Grid } from '@mui/material';
 import Header from '../components/Header';
 import DashboardSidebar from '../components/DashboardSidebar';
@@ -6,6 +6,7 @@ import DashboardContent from '../components/DashboardContent';
 import ChatBox from '../components/ChatBox';
 
 const DashboardPage = () => {
+    const [selectedSiteId, setSelectedSiteId] = useState('');
     return (
         <Container
             maxWidth="xl"
@@ -20,22 +21,28 @@ const DashboardPage = () => {
                 <Header />
             </Box>
             
-            <Grid container spacing={3} sx={{ flexGrow: 1 }}>
-                {/* Left Sidebar */}
-                <Grid item xs={12} md={3}>
-                    <DashboardSidebar />
+            <Box sx={{ flexGrow: 1 }}>
+                {/* Top Row - Sidebar and Content */}
+                <Grid container spacing={3} sx={{ mb: 3 }}>
+                    <Grid item xs={12} md={6}>
+                        <DashboardSidebar 
+                            selectedSite={selectedSiteId}
+                            onSiteChange={setSelectedSiteId}
+                        />
+                    </Grid>
+                    
+                    <Grid item xs={12} md={6}>
+                        <DashboardContent selectedSiteId={selectedSiteId} />
+                    </Grid>
                 </Grid>
                 
-                {/* Main Content */}
-                <Grid item xs={12} md={6}>
-                    <DashboardContent />
-                </Grid>
-                
-                {/* Right Chatbox */}
-                <Grid item xs={12} md={3}>
-                    <ChatBox />
-                </Grid>
-            </Grid>
+                {/* Bottom Row - Centered ChatBox */}
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Box sx={{ width: '100%', maxWidth: 900 }}>
+                        <ChatBox />
+                    </Box>
+                </Box>
+            </Box>
         </Container>
     );
 };

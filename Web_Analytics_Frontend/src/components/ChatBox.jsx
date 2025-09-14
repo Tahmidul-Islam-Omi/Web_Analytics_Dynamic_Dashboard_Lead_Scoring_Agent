@@ -80,27 +80,27 @@ const ChatBox = () => {
 
     const generateBotResponse = (query) => {
         const lowerQuery = query.toLowerCase();
-        
+
         if (lowerQuery.includes('top pages') || lowerQuery.includes('popular pages')) {
             return 'Based on your analytics, your top performing pages are:\n\n1. /home (4,521 views)\n2. /products (2,834 views)\n3. /about (1,923 views)\n\nYour homepage is performing exceptionally well!';
         }
-        
+
         if (lowerQuery.includes('visitor') || lowerQuery.includes('traffic')) {
             return 'Your website has received 3,421 unique visitors this month, which is an 8.2% increase from last month. Peak traffic occurs between 2-4 PM on weekdays.';
         }
-        
+
         if (lowerQuery.includes('session') || lowerQuery.includes('duration')) {
             return 'Your average session duration is 2 minutes and 34 seconds. Users typically view 3.7 pages per session. Consider adding more engaging content to increase session time.';
         }
-        
+
         if (lowerQuery.includes('improve') || lowerQuery.includes('optimize')) {
             return 'Here are some suggestions to improve your analytics:\n\n• Add more engaging content to increase session duration\n• Optimize your top pages for better conversion\n• Implement A/B testing for key pages\n• Focus on mobile optimization';
         }
-        
+
         if (lowerQuery.includes('lead score') || lowerQuery.includes('scoring')) {
             return 'Your lead scoring system tracks user engagement. Current average score is 72/100. High-scoring users (80+) typically view 5+ pages and spend 4+ minutes on site.';
         }
-        
+
         return 'I can help you with analytics insights, performance metrics, visitor behavior, and optimization suggestions. Try asking about your top pages, visitor trends, or how to improve your website performance!';
     };
 
@@ -116,11 +116,11 @@ const ChatBox = () => {
     };
 
     return (
-        <Paper 
-            elevation={2} 
-            sx={{ 
-                height: '600px', 
-                display: 'flex', 
+        <Paper
+            elevation={2}
+            sx={{
+                height: '600px',
+                display: 'flex',
                 flexDirection: 'column',
                 borderRadius: 2,
                 overflow: 'hidden'
@@ -200,9 +200,9 @@ const ChatBox = () => {
                                         color: message.type === 'user' ? 'white' : 'text.primary'
                                     }}
                                 >
-                                    <Typography 
-                                        variant="body2" 
-                                        sx={{ 
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
                                             whiteSpace: 'pre-line',
                                             wordBreak: 'break-word'
                                         }}
@@ -213,7 +213,7 @@ const ChatBox = () => {
                             </Box>
                         </ListItem>
                     ))}
-                    
+
                     {isTyping && (
                         <ListItem sx={{ px: 1, py: 0.5 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>

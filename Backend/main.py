@@ -8,6 +8,7 @@ from routers.users import router as users_router
 from routers.page_views import router as page_views_router
 from routers.click_events import router as click_events_router
 from routers.lead_scoring import router as lead_scoring_router
+from routers.analytics import router as analytics_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -57,6 +58,7 @@ app.include_router(users_router)
 app.include_router(page_views_router)
 app.include_router(click_events_router)
 app.include_router(lead_scoring_router)
+app.include_router(analytics_router)
 
 @app.get("/")
 async def read_root():

@@ -5,6 +5,21 @@ import logging
 
 router = APIRouter(prefix="/api", tags=["websites"])
 
+@router.get("/websites", response_model=dict)
+async def get_websites():
+    """Get all websites for dropdown selection"""
+    try:
+        websites = await WebsiteService.get_all_websites()
+        
+        return {
+            "status": "success",
+            "websites": websites
+        }
+        
+    except Exception as e:
+        logging.error(f"❌ Error fetching websites: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
 @router.post("/websites", response_model=dict)
 async def create_website(request: Request):
     """Create a new website for tracking"""
