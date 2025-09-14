@@ -27,11 +27,15 @@ import {
 
 const DashboardContent = ({ selectedSiteId }) => {
     const [metrics, setMetrics] = useState([]);
+    const [topPages, setTopPages] = useState([]);
+    const [recentSessions, setRecentSessions] = useState([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (selectedSiteId) {
             fetchMetrics();
+            fetchTopPages();
+            fetchRecentSessions();
         }
     }, [selectedSiteId]);
 
@@ -85,21 +89,35 @@ const DashboardContent = ({ selectedSiteId }) => {
         }
     };
 
-    const topPages = [
-        { page: '/home', views: 4521, percentage: 36 },
-        { page: '/products', views: 2834, percentage: 23 },
-        { page: '/about', views: 1923, percentage: 15 },
-        { page: '/contact', views: 1456, percentage: 12 },
-        { page: '/blog', views: 1809, percentage: 14 }
-    ];
+    const fetchTopPages = async () => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/api/analytics/${selectedSiteId}/top-pages`);
+            const data = await response.json();
 
-    const recentSessions = [
-        { id: 1, location: 'New York, US', duration: '3m 45s', pages: 5, score: 85 },
-        { id: 2, location: 'London, UK', duration: '2m 12s', pages: 3, score: 62 },
-        { id: 3, location: 'Tokyo, JP', duration: '4m 33s', pages: 7, score: 94 },
-        { id: 4, location: 'Berlin, DE', duration: '1m 58s', pages: 2, score: 45 },
-        { id: 5, location: 'Sydney, AU', duration: '5m 21s', pages: 8, score: 98 }
-    ];
+            if (data.status === 'success') {
+                setTopPages(data.top_pages);
+            }
+        } catch (error) {
+            console.error('Error fetching top pages:', error);
+        }
+    };
+
+    const fetchRecentSessions = async () => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/api/analytics/${selectedSiteId}/recent-sessions`);
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                setRecentSessions(data.recent_sessions);
+            }
+        } catch (error) {
+            console.error('Error fetching recent sessions:', error);
+        }
+    };
+
+
+
+
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -156,82 +174,99 @@ const DashboardContent = ({ selectedSiteId }) => {
             )}
 
             {/* Top Pages */}
-            <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
-                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-                    Top Pages
-                </Typography>
+            {selectedSiteId && (
+                <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                    <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+                        Top Pages
+                    </Typography>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {topPages.map((page, index) => (
-                        <Box key={index}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                                    {page.page}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {page.views.toLocaleString()} views
-                                </Typography>
-                            </Box>
-                            <LinearProgress
-                                variant="determinate"
-                                value={page.percentage}
-                                sx={{
-                                    height: 8,
-                                    borderRadius: 4,
-                                    bgcolor: 'grey.200',
-                                    '& .MuiLinearProgress-bar': {
-                                        borderRadius: 4
-                                    }
-                                }}
-                            />
+                    {topPages.length === 0 ? (
+                        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                            No page data available yet
+                        </Typography>
+                    ) : (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {topPages.map((page, index) => (
+                                <Box key={index}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                        <Box>
+                                            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                                {page.page}
+                                            </Typography>
+                                            {page.url && page.page !== page.url && (
+                                                <Typography variant="caption" color="text.secondary">
+                                                    {page.url}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {page.views.toLocaleString()} views
+                                        </Typography>
+                                    </Box>
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={page.percentage}
+                                        sx={{
+                                            height: 8,
+                                            borderRadius: 4,
+                                            bgcolor: 'grey.200',
+                                            '& .MuiLinearProgress-bar': {
+                                                borderRadius: 4
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            ))}
                         </Box>
-                    ))}
-                </Box>
-            </Paper>
+                    )}
+                </Paper>
+            )}
 
             {/* Recent Sessions */}
-            <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
-                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-                    Recent Sessions
-                </Typography>
+            {selectedSiteId && (
+                <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                    <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+                        Recent Sessions
+                    </Typography>
 
-                <TableContainer>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Location</TableCell>
-                                <TableCell>Duration</TableCell>
-                                <TableCell>Pages</TableCell>
-                                <TableCell>Lead Score</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {recentSessions.map((session) => (
-                                <TableRow key={session.id} hover>
-                                    <TableCell>
-                                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                            {session.location}
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell>{session.duration}</TableCell>
-                                    <TableCell>{session.pages}</TableCell>
-                                    <TableCell>
-                                        <Chip
-                                            label={session.score}
-                                            color={
-                                                session.score >= 80 ? 'success' :
-                                                    session.score >= 60 ? 'warning' : 'error'
-                                            }
-                                            size="small"
-                                            variant="outlined"
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Paper>
+                    {recentSessions.length === 0 ? (
+                        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                            No session data available yet
+                        </Typography>
+                    ) : (
+                        <TableContainer>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Duration</TableCell>
+                                        <TableCell>Pages</TableCell>
+                                        <TableCell>Lead Score</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {recentSessions.map((session) => (
+                                        <TableRow key={session.session_id} hover>
+                                            <TableCell>{session.duration}</TableCell>
+                                            <TableCell>{session.pages}</TableCell>
+                                            <TableCell>
+                                                <Chip
+                                                    label={session.lead_score}
+                                                    color={
+                                                        session.lead_score >= 80 ? 'success' :
+                                                            session.lead_score >= 60 ? 'warning' : 'error'
+                                                    }
+                                                    size="small"
+                                                    variant="outlined"
+                                                />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )}
+                </Paper>
+            )}
         </Box>
     );
 };
