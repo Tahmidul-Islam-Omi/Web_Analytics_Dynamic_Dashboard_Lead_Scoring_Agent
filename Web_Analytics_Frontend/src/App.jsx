@@ -1,9 +1,9 @@
 import React from 'react';
+ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Container, Box } from '@mui/material';
-import Header from './components/Header';
-import WebsiteForm from './components/WebsiteForm';
+import HomePage from './pages/HomePage';
+import DashboardPage from './pages/DashboardPage';
 
 const theme = createTheme({
     palette: {
@@ -37,20 +37,12 @@ function App() {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Container
-                maxWidth="lg"
-                sx={{
-                    py: 4,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center'
-                }}
-            >
-                <Box sx={{ width: '100%', maxWidth: 1200 }}>
-                    <Header />
-                    <WebsiteForm />
-                </Box>
-            </Container>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/dashboard" element={<DashboardPage />} />
+                </Routes>
+            </Router>
         </ThemeProvider>
     );
 }
