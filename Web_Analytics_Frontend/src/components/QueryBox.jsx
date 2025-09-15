@@ -15,7 +15,7 @@ import {
     SmartToy
 } from '@mui/icons-material';
 
-const ChatBox = () => {
+const QueryBox = () => {
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [currentResponse, setCurrentResponse] = useState('');
@@ -26,7 +26,7 @@ const ChatBox = () => {
         { text: 'Give me in LineCharts which pages have the most click activity.' },
     ];
 
-    const handleSendMessage = async () => {
+    const handleSubmitQuery = async () => {
         if (!inputValue.trim()) return;
 
         const question = inputValue;
@@ -35,7 +35,7 @@ const ChatBox = () => {
 
         try {
             // Send query to backend API
-            const response = await fetch('http://127.0.0.1:8000/api/chat/query', {
+            const response = await fetch('http://127.0.0.1:8000/api/query/search', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -54,12 +54,12 @@ const ChatBox = () => {
             const data = await response.json();
 
             // Log the response for debugging
-            console.log('Chat API Response:', data);
+            console.log('Query API Response:', data);
 
             setCurrentResponse(data.response || 'Thanks for your query');
 
         } catch (error) {
-            console.error('Error sending chat message:', error);
+            console.error('Error submitting query:', error);
             setCurrentResponse('Sorry, I encountered an error processing your request. Please try again.');
         } finally {
             setIsTyping(false);
@@ -73,7 +73,7 @@ const ChatBox = () => {
     const handleKeyPress = (event) => {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
-            handleSendMessage();
+            handleSubmitQuery();
         }
     };
 
@@ -206,7 +206,7 @@ const ChatBox = () => {
                         endAdornment: (
                             <InputAdornment position="end">
                                 <IconButton
-                                    onClick={handleSendMessage}
+                                    onClick={handleSubmitQuery}
                                     disabled={!inputValue.trim() || isTyping}
                                     color="primary"
                                     size="small"
@@ -223,4 +223,4 @@ const ChatBox = () => {
     );
 };
 
-export default ChatBox;
+export default QueryBox;

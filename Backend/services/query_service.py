@@ -5,23 +5,23 @@ from typing import Optional, Dict, Any
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class ChatService:
+class QueryService:
     """
-    Service class for handling chat-related operations.
+    Service class for handling search query operations.
     Simply logs queries and returns a standard response.
     """
     
     @staticmethod
-    async def process_chat_query(
+    async def process_search_query(
         message: str, 
         site_id: Optional[str] = None, 
         user_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Process a chat query from the dashboard assistant.
+        Process a search query from the dashboard assistant.
         
         Args:
-            message: The user's chat message
+            message: The user's search query
             site_id: Optional site identifier for context
             user_id: Optional user identifier for context
             
@@ -30,7 +30,7 @@ class ChatService:
         """
         try:
             # Log the query to console
-            logger.info(f"📝 Chat Query: {message}")
+            logger.info(f"🔍 Search Query: {message}")
             if site_id:
                 logger.info(f"🌐 Site ID: {site_id}")
             if user_id:
@@ -43,7 +43,7 @@ class ChatService:
             }
             
         except Exception as e:
-            logger.error(f"❌ Error processing chat query: {e}")
+            logger.error(f"❌ Error processing search query: {e}")
             return {
                 "success": False,
                 "message": f"Error processing query: {str(e)}",

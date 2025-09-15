@@ -3,7 +3,7 @@ import { Container, Box, Grid } from '@mui/material';
 import Header from '../components/Header';
 import DashboardSidebar from '../components/DashboardSidebar';
 import DashboardContent from '../components/DashboardContent';
-import ChatBox from '../components/ChatBox';
+import QueryBox from '../components/QueryBox';
 
 const DashboardPage = () => {
     const [selectedSiteId, setSelectedSiteId] = useState('');
@@ -36,10 +36,10 @@ const DashboardPage = () => {
                     </Grid>
                 </Grid>
                 
-                {/* Bottom Row - Centered ChatBox */}
+                {/* Bottom Row - Centered QueryBox */}
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <Box sx={{ width: '100%', maxWidth: 900 }}>
-                        <ChatBox />
+                        <QueryBox />
                     </Box>
                 </Box>
             </Box>
