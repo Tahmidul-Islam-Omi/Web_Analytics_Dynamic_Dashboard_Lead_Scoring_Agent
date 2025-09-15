@@ -23,14 +23,16 @@ import {
 } from '@mui/icons-material';
 
 const ChatBox = () => {
+
     const [messages, setMessages] = useState([
         {
             id: 1,
             type: 'bot',
-            content: 'Hello! I\'m your analytics assistant. Ask me anything about your website performance, metrics, or how to improve your analytics.',
+            content: 'Hi! I’m your Dynamic Dashboard Assistant. You can explore your website’s performance—like visitor traffic, session trends, top pages, user journeys, and click interactions. I’ll turn your questions into visual insights, and you can choose how to see them with a BarChart, DoughnutChart, LineChart, or ScatterChart.',
             timestamp: new Date()
         }
     ]);
+
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef(null);
@@ -44,10 +46,9 @@ const ChatBox = () => {
     }, [messages]);
 
     const quickQuestions = [
-        { text: 'Show top pages', icon: <TrendingUp /> },
-        { text: 'Visitor trends', icon: <Visibility /> },
-        { text: 'Session duration', icon: <Schedule /> },
-        { text: 'Help me improve', icon: <Help /> }
+        { text: 'Find the top 5 pages by total number of page views. Show using DoughnutChart.'},
+        { text: 'Give me in BarChart which pages have the longest view duration.' },
+        { text: 'Give me in LineCharts which pages have the most click activity.' },
     ];
 
     const handleSendMessage = async () => {
@@ -61,48 +62,59 @@ const ChatBox = () => {
         };
 
         setMessages(prev => [...prev, userMessage]);
+        const currentInput = inputValue;
         setInputValue('');
         setIsTyping(true);
 
-        // Simulate bot response
-        setTimeout(() => {
-            const botResponse = generateBotResponse(inputValue);
+        try {
+            // Send query to backend API
+            const response = await fetch('http://127.0.0.1:8000/api/chat/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: currentInput,
+                    site_id: null, // Could be passed from parent component
+                    user_id: null  // Could be passed from parent component
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            // Log the response for debugging
+            console.log('Chat API Response:', data);
+            
             const botMessage = {
                 id: Date.now() + 1,
                 type: 'bot',
-                content: botResponse,
+                content: data.response || 'Query received successfully!',
                 timestamp: new Date()
             };
+            
             setMessages(prev => [...prev, botMessage]);
+            
+        } catch (error) {
+            console.error('Error sending chat message:', error);
+            
+            const errorMessage = {
+                id: Date.now() + 1,
+                type: 'bot',
+                content: 'Sorry, I encountered an error processing your request. Please try again.',
+                timestamp: new Date()
+            };
+            
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
             setIsTyping(false);
-        }, 1500);
+        }
     };
 
-    const generateBotResponse = (query) => {
-        const lowerQuery = query.toLowerCase();
 
-        if (lowerQuery.includes('top pages') || lowerQuery.includes('popular pages')) {
-            return 'Based on your analytics, your top performing pages are:\n\n1. /home (4,521 views)\n2. /products (2,834 views)\n3. /about (1,923 views)\n\nYour homepage is performing exceptionally well!';
-        }
-
-        if (lowerQuery.includes('visitor') || lowerQuery.includes('traffic')) {
-            return 'Your website has received 3,421 unique visitors this month, which is an 8.2% increase from last month. Peak traffic occurs between 2-4 PM on weekdays.';
-        }
-
-        if (lowerQuery.includes('session') || lowerQuery.includes('duration')) {
-            return 'Your average session duration is 2 minutes and 34 seconds. Users typically view 3.7 pages per session. Consider adding more engaging content to increase session time.';
-        }
-
-        if (lowerQuery.includes('improve') || lowerQuery.includes('optimize')) {
-            return 'Here are some suggestions to improve your analytics:\n\n• Add more engaging content to increase session duration\n• Optimize your top pages for better conversion\n• Implement A/B testing for key pages\n• Focus on mobile optimization';
-        }
-
-        if (lowerQuery.includes('lead score') || lowerQuery.includes('scoring')) {
-            return 'Your lead scoring system tracks user engagement. Current average score is 72/100. High-scoring users (80+) typically view 5+ pages and spend 4+ minutes on site.';
-        }
-
-        return 'I can help you with analytics insights, performance metrics, visitor behavior, and optimization suggestions. Try asking about your top pages, visitor trends, or how to improve your website performance!';
-    };
 
     const handleQuickQuestion = (question) => {
         setInputValue(question);
@@ -131,11 +143,11 @@ const ChatBox = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <SmartToy sx={{ mr: 1 }} />
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Analytics Assistant
+                        Dynamic DashBoard Assistant !!!
                     </Typography>
                 </Box>
                 <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
-                    Ask me about your website analytics
+                    Ask me anything about your website analytics
                 </Typography>
             </Box>
 
