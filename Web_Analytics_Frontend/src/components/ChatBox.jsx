@@ -1,12 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Paper,
     Box,
     Typography,
     TextField,
     IconButton,
-    List,
-    ListItem,
     Avatar,
     Chip,
     Divider,
@@ -14,39 +12,16 @@ import {
 } from '@mui/material';
 import {
     Send,
-    SmartToy,
-    Person,
-    TrendingUp,
-    Visibility,
-    Schedule,
-    Help
+    SmartToy
 } from '@mui/icons-material';
 
 const ChatBox = () => {
-
-    const [messages, setMessages] = useState([
-        {
-            id: 1,
-            type: 'bot',
-            content: 'Hi! I’m your Dynamic Dashboard Assistant. You can explore your website’s performance—like visitor traffic, session trends, top pages, user journeys, and click interactions. I’ll turn your questions into visual insights, and you can choose how to see them with a BarChart, DoughnutChart, LineChart, or ScatterChart.',
-            timestamp: new Date()
-        }
-    ]);
-
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
-    const messagesEndRef = useRef(null);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+    const [currentResponse, setCurrentResponse] = useState('Hi! I\'m your Dynamic Dashboard Assistant. You can explore your website\'s performance—like visitor traffic, session trends, top pages, user journeys, and click interactions. I\'ll turn your questions into visual insights, and you can choose how to see them with a BarChart, DoughnutChart, LineChart, or ScatterChart.');
 
     const quickQuestions = [
-        { text: 'Find the top 5 pages by total number of page views. Show using DoughnutChart.'},
+        { text: 'Find the top 5 pages by total number of page views. Show using DoughnutChart.' },
         { text: 'Give me in BarChart which pages have the longest view duration.' },
         { text: 'Give me in LineCharts which pages have the most click activity.' },
     ];
@@ -54,16 +29,8 @@ const ChatBox = () => {
     const handleSendMessage = async () => {
         if (!inputValue.trim()) return;
 
-        const userMessage = {
-            id: Date.now(),
-            type: 'user',
-            content: inputValue,
-            timestamp: new Date()
-        };
-
-        setMessages(prev => [...prev, userMessage]);
-        const currentInput = inputValue;
-        setInputValue('');
+        const question = inputValue;
+        // Don't clear the input - keep the question there
         setIsTyping(true);
 
         try {
@@ -74,9 +41,9 @@ const ChatBox = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    message: currentInput,
-                    site_id: null, // Could be passed from parent component
-                    user_id: null  // Could be passed from parent component
+                    message: question,
+                    site_id: null,
+                    user_id: null
                 })
             });
 
@@ -85,36 +52,19 @@ const ChatBox = () => {
             }
 
             const data = await response.json();
-            
+
             // Log the response for debugging
             console.log('Chat API Response:', data);
-            
-            const botMessage = {
-                id: Date.now() + 1,
-                type: 'bot',
-                content: data.response || 'Query received successfully!',
-                timestamp: new Date()
-            };
-            
-            setMessages(prev => [...prev, botMessage]);
-            
+
+            setCurrentResponse(data.response || 'Thanks for your query');
+
         } catch (error) {
             console.error('Error sending chat message:', error);
-            
-            const errorMessage = {
-                id: Date.now() + 1,
-                type: 'bot',
-                content: 'Sorry, I encountered an error processing your request. Please try again.',
-                timestamp: new Date()
-            };
-            
-            setMessages(prev => [...prev, errorMessage]);
+            setCurrentResponse('Sorry, I encountered an error processing your request. Please try again.');
         } finally {
             setIsTyping(false);
         }
     };
-
-
 
     const handleQuickQuestion = (question) => {
         setInputValue(question);
@@ -160,7 +110,6 @@ const ChatBox = () => {
                     {quickQuestions.map((question, index) => (
                         <Chip
                             key={index}
-                            icon={question.icon}
                             label={question.text}
                             size="small"
                             variant="outlined"
@@ -172,76 +121,47 @@ const ChatBox = () => {
                 </Box>
             </Box>
 
-            {/* Messages */}
-            <Box sx={{ flexGrow: 1, overflow: 'auto', p: 1 }}>
-                <List sx={{ p: 0 }}>
-                    {messages.map((message) => (
-                        <ListItem
-                            key={message.id}
+            {/* Response Area */}
+            <Box sx={{ flexGrow: 1, overflow: 'auto', p: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Avatar sx={{ width: 40, height: 40, mr: 2, bgcolor: 'secondary.main' }}>
+                        <SmartToy />
+                    </Avatar>
+                    <Typography variant="h6" color="text.primary">
+                        Assistant Response
+                    </Typography>
+                </Box>
+
+                <Paper
+                    elevation={1}
+                    sx={{
+                        p: 3,
+                        borderRadius: 2,
+                        bgcolor: 'grey.50',
+                        minHeight: '200px',
+                        display: 'flex',
+                        alignItems: isTyping ? 'center' : 'flex-start'
+                    }}
+                >
+                    {isTyping ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                            <Typography variant="body1" color="text.secondary">
+                                🔍 Analyzing your data...
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <Typography
+                            variant="body1"
                             sx={{
-                                display: 'flex',
-                                justifyContent: message.type === 'user' ? 'flex-end' : 'flex-start',
-                                px: 1,
-                                py: 0.5
+                                whiteSpace: 'pre-line',
+                                wordBreak: 'break-word',
+                                lineHeight: 1.6
                             }}
                         >
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'flex-start',
-                                    maxWidth: '85%',
-                                    flexDirection: message.type === 'user' ? 'row-reverse' : 'row'
-                                }}
-                            >
-                                <Avatar
-                                    sx={{
-                                        width: 32,
-                                        height: 32,
-                                        mx: 1,
-                                        bgcolor: message.type === 'user' ? 'primary.main' : 'secondary.main'
-                                    }}
-                                >
-                                    {message.type === 'user' ? <Person /> : <SmartToy />}
-                                </Avatar>
-                                <Paper
-                                    elevation={1}
-                                    sx={{
-                                        p: 1.5,
-                                        borderRadius: 2,
-                                        bgcolor: message.type === 'user' ? 'primary.light' : 'grey.100',
-                                        color: message.type === 'user' ? 'white' : 'text.primary'
-                                    }}
-                                >
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            whiteSpace: 'pre-line',
-                                            wordBreak: 'break-word'
-                                        }}
-                                    >
-                                        {message.content}
-                                    </Typography>
-                                </Paper>
-                            </Box>
-                        </ListItem>
-                    ))}
-
-                    {isTyping && (
-                        <ListItem sx={{ px: 1, py: 0.5 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Avatar sx={{ width: 32, height: 32, mr: 1, bgcolor: 'secondary.main' }}>
-                                    <SmartToy />
-                                </Avatar>
-                                <Paper elevation={1} sx={{ p: 1.5, borderRadius: 2, bgcolor: 'grey.100' }}>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Analyzing your data...
-                                    </Typography>
-                                </Paper>
-                            </Box>
-                        </ListItem>
+                            {currentResponse}
+                        </Typography>
                     )}
-                </List>
-                <div ref={messagesEndRef} />
+                </Paper>
             </Box>
 
             <Divider />
