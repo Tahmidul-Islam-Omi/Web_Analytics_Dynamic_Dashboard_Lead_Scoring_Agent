@@ -1,5 +1,6 @@
 import logging
 from typing import Optional, Dict, Any
+from .llm_service import llm_service
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -8,7 +9,7 @@ logger = logging.getLogger(__name__)
 class QueryService:
     """
     Service class for handling search query operations.
-    Simply logs queries and returns a standard response.
+    Processes natural language queries and converts them to SQL using LLM.
     """
     
     @staticmethod
@@ -26,7 +27,7 @@ class QueryService:
             user_id: Optional user identifier for context
             
         Returns:
-            Dictionary containing processing results
+            Dictionary containing processing results with generated SQL
         """
         try:
             # Log the query to console
@@ -36,16 +37,28 @@ class QueryService:
             if user_id:
                 logger.info(f"👤 User ID: {user_id}")
             
-            return {
-                "success": True,
-                "message": "Query received successfully",
-                "response": "Thanks for your query"
-            }
+            # Generate SQL using LLM service
+            sql_response = await llm_service.generate_sql_from_query(message)
+            
+            if sql_response:
+                logger.info(f"📝 Generated SQL response")
+                return {
+                    "success": True,
+                    "message": "Query processed successfully",
+                    "response": sql_response
+                }
+            else:
+                logger.warning("⚠️ No SQL response generated")
+                return {
+                    "success": False,
+                    "message": "Failed to generate SQL",
+                    "response": "Unable to process your query. Please try rephrasing."
+                }
             
         except Exception as e:
             logger.error(f"❌ Error processing search query: {e}")
             return {
                 "success": False,
                 "message": f"Error processing query: {str(e)}",
-                "response": "Thanks for your query"
+                "response": "An error occurred while processing your query. Please try again."
             }
