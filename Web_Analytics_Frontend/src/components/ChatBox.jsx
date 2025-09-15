@@ -18,7 +18,7 @@ import {
 const ChatBox = () => {
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
-    const [currentResponse, setCurrentResponse] = useState('Hi! I\'m your Dynamic Dashboard Assistant. You can explore your website\'s performance—like visitor traffic, session trends, top pages, user journeys, and click interactions. I\'ll turn your questions into visual insights, and you can choose how to see them with a BarChart, DoughnutChart, LineChart, or ScatterChart.');
+    const [currentResponse, setCurrentResponse] = useState('');
 
     const quickQuestions = [
         { text: 'Find the top 5 pages by total number of page views. Show using DoughnutChart.' },
@@ -132,36 +132,60 @@ const ChatBox = () => {
                     </Typography>
                 </Box>
 
+                {/* Static Welcome Message */}
                 <Paper
                     elevation={1}
                     sx={{
                         p: 3,
                         borderRadius: 2,
-                        bgcolor: 'grey.50',
-                        minHeight: '200px',
-                        display: 'flex',
-                        alignItems: isTyping ? 'center' : 'flex-start'
+                        bgcolor: 'primary.light',
+                        color: 'white',
+                        mb: 2
                     }}
                 >
-                    {isTyping ? (
-                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                            <Typography variant="body1" color="text.secondary">
-                                🔍 Analyzing your data...
-                            </Typography>
-                        </Box>
-                    ) : (
-                        <Typography
-                            variant="body1"
-                            sx={{
-                                whiteSpace: 'pre-line',
-                                wordBreak: 'break-word',
-                                lineHeight: 1.6
-                            }}
-                        >
-                            {currentResponse}
-                        </Typography>
-                    )}
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            lineHeight: 1.6
+                        }}
+                    >
+                        Hi! I'm your Dynamic Dashboard Assistant. You can explore your website's performance—like visitor traffic, session trends, top pages, user journeys, and click interactions. I'll turn your questions into visual insights, and you can choose how to see them with a BarChart, DoughnutChart, LineChart, or ScatterChart.
+                    </Typography>
                 </Paper>
+
+                {/* Dynamic Response Area */}
+                {(currentResponse || isTyping) && (
+                    <Paper
+                        elevation={1}
+                        sx={{
+                            p: 3,
+                            borderRadius: 2,
+                            bgcolor: 'grey.50',
+                            minHeight: '100px',
+                            display: 'flex',
+                            alignItems: isTyping ? 'center' : 'flex-start'
+                        }}
+                    >
+                        {isTyping ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                <Typography variant="body1" color="text.secondary">
+                                    🔍 Analyzing your data...
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <Typography
+                                variant="body1"
+                                sx={{
+                                    whiteSpace: 'pre-line',
+                                    wordBreak: 'break-word',
+                                    lineHeight: 1.6
+                                }}
+                            >
+                                {currentResponse}
+                            </Typography>
+                        )}
+                    </Paper>
+                )}
             </Box>
 
             <Divider />
