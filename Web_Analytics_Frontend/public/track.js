@@ -182,7 +182,7 @@
               userAgent
             };
 
-            const userResponse = await fetch("http://127.0.0.1:8000/api/users", {
+            const userResponse = await fetch("https://web-analytics-agent.onrender.com/api/users", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(userData),
@@ -203,7 +203,7 @@
               action: "update_last_seen"
             };
 
-            const updateResponse = await fetch("http://127.0.0.1:8000/api/users", {
+            const updateResponse = await fetch("https://web-analytics-agent.onrender.com/api/users", {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(updateData),
@@ -225,7 +225,7 @@
                 userAgent
               };
 
-              const createResponse = await fetch("http://127.0.0.1:8000/api/users", {
+              const createResponse = await fetch("https://web-analytics-agent.onrender.com/api/users", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(userData),
@@ -263,7 +263,7 @@
               action: "start"
             };
 
-            const sessionResponse = await fetch("http://127.0.0.1:8000/api/sessions", {
+            const sessionResponse = await fetch("https://web-analytics-agent.onrender.com/api/sessions", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(sessionData),
@@ -302,7 +302,7 @@
             referrer
           };
 
-          const response = await fetch("http://127.0.0.1:8000/api/page-views", {
+          const response = await fetch("https://web-analytics-agent.onrender.com/api/page-views", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(pageData),
@@ -435,7 +435,7 @@
             yCoord: y
           };
 
-          const response = await fetch("http://127.0.0.1:8000/api/click-events", {
+          const response = await fetch("https://web-analytics-agent.onrender.com/api/click-events", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(clickData),
@@ -569,7 +569,7 @@
         // Strategy 1: sendBeacon (most reliable for page unload)
         if (navigator.sendBeacon) {
           const success = navigator.sendBeacon(
-            "http://127.0.0.1:8000/api/sessions",
+            "https://web-analytics-agent.onrender.com/api/sessions",
             JSON.stringify(endData)
           );
           if (success) {
@@ -579,7 +579,7 @@
         }
 
         // Strategy 2: fetch with keepalive (fallback)
-        fetch("http://127.0.0.1:8000/api/sessions", {
+        fetch("https://web-analytics-agent.onrender.com/api/sessions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(endData),
@@ -608,7 +608,7 @@
           action: "update"
         };
 
-        fetch("http://127.0.0.1:8000/api/sessions", {
+        fetch("https://web-analytics-agent.onrender.com/api/sessions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updateData),

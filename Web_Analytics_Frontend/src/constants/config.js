@@ -11,7 +11,11 @@ export const API_ENDPOINTS = {
 };
 
 // Tracking Script Configuration
-export const TRACKING_SCRIPT_URL = `${API_BASE_URL}/track.js`;
+// Local development URL (uncomment for local development)
+// export const TRACKING_SCRIPT_URL = 'http://localhost:5173/track.js';
+
+// Production URL (Netlify deployment)
+export const TRACKING_SCRIPT_URL = 'https://golden-otter-3c41ba.netlify.app/track.js';
 
 // UI Configuration
 export const FORM_VALIDATION = {
