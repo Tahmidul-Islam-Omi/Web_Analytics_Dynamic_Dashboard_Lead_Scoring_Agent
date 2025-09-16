@@ -36,7 +36,8 @@ const DashboardSidebar = ({ selectedSite, onSiteChange }) => {
 
     const fetchWebsites = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/websites');
+            //const response = await fetch('http://127.0.0.1:8000/api/websites');
+            const response = await fetch('https://web-analytics-agent.onrender.com/api/websites');
             const data = await response.json();
 
             if (data.status === 'success') {

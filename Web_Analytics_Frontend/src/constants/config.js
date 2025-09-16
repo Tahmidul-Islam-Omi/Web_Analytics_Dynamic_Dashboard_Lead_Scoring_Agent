@@ -1,5 +1,10 @@
 // API Configuration
-export const API_BASE_URL = 'http://127.0.0.1:8000';
+// Local development URL (uncomment for local development)
+// export const API_BASE_URL = 'http://127.0.0.1:8000';
+
+// Production URL (Render deployment)
+export const API_BASE_URL = 'https://web-analytics-agent.onrender.com';
+
 export const API_ENDPOINTS = {
   TRACK: '/api/track',
   WEBSITES: '/api/websites',

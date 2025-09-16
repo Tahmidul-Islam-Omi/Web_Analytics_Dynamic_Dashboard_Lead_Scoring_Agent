@@ -105,7 +105,8 @@ const WebsiteForm = () => {
       const siteId = generateSiteId(siteName.trim());
 
       // Call backend API
-      const response = await fetch('http://127.0.0.1:8000/api/websites', {
+      //const response = await fetch('http://127.0.0.1:8000/api/websites', {
+      const response = await fetch('https://web-analytics-agent.onrender.com/api/websites', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

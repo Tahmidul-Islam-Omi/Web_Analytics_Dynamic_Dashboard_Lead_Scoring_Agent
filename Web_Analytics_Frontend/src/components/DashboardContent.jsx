@@ -42,7 +42,7 @@ const DashboardContent = ({ selectedSiteId }) => {
     const fetchMetrics = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/analytics/${selectedSiteId}/metrics`);
+            const response = await fetch(`https://web-analytics-agent.onrender.com/api/analytics/${selectedSiteId}/metrics`);
             const data = await response.json();
 
             if (data.status === 'success') {
@@ -91,7 +91,7 @@ const DashboardContent = ({ selectedSiteId }) => {
 
     const fetchTopPages = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/analytics/${selectedSiteId}/top-pages`);
+            const response = await fetch(`https://web-analytics-agent.onrender.com/api/analytics/${selectedSiteId}/top-pages`);
             const data = await response.json();
 
             if (data.status === 'success') {
@@ -104,7 +104,7 @@ const DashboardContent = ({ selectedSiteId }) => {
 
     const fetchRecentSessions = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/analytics/${selectedSiteId}/recent-sessions`);
+            const response = await fetch(`https://web-analytics-agent.onrender.com/api/analytics/${selectedSiteId}/recent-sessions`);
             const data = await response.json();
 
             if (data.status === 'success') {
