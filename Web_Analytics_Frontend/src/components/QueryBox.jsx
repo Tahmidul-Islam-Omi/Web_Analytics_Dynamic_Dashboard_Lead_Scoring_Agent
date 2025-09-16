@@ -99,11 +99,14 @@ const QueryBox = () => {
         <Paper
             elevation={2}
             sx={{
-                height: '600px',
+                height: '1200px',
+                width: '100%',
+                maxWidth: '1200px',
                 display: 'flex',
                 flexDirection: 'column',
                 borderRadius: 2,
-                overflow: 'hidden'
+                overflow: 'hidden',
+                margin: '0 auto'
             }}
         >
             {/* Header */}
