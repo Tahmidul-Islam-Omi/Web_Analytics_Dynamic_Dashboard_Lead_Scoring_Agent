@@ -70,6 +70,27 @@ export const chartConfig = {{
 datasetLabel: "Average View Duration (seconds) by Page"
 }};"""
 
+    def _clean_code_block(self, llm_response: str) -> str:
+        """Removes triple backticks and optional language tags (e.g., ```javascript)."""
+        return llm_response.replace("```javascript", "").replace("```", "").strip()
+    
+    def _add_helper_function(self, cleaned_response: str) -> str:
+        """Add the generateChartData helper function to the cleaned response."""
+        helper_function = """
+// Helper function to generate chart data from entries
+export const generateChartData = () => {
+return {
+labels: chartEntries.map(entry => entry.label),
+values: chartEntries.map(entry => entry.value),
+colors: {
+backgroundColor: chartEntries.map(entry => entry.color),
+hoverBackgroundColor: chartEntries.map(entry => entry.hoverColor),
+},
+label: chartConfig.datasetLabel
+};
+};"""
+        return cleaned_response + helper_function
+
     async def format_chart_data(self, user_query: str, sql_result: Dict[str, Any]) -> Optional[str]:
         """
         Format SQL results into chart-ready JavaScript code using LLM.
@@ -97,13 +118,17 @@ datasetLabel: "Average View Duration (seconds) by Page"
             response = self.model.generate_content(full_prompt)
             
             if response and response.text:
+                # Clean the response and add helper function
+                cleaned_response = self._clean_code_block(response.text)
+                complete_code = self._add_helper_function(cleaned_response)
+                
                 logger.info("✅ Chart data formatted successfully")
-                logger.info("🎯 CHART FORMATTING RESPONSE:")
+                logger.info("🎯 CHART-READY JAVASCRIPT CODE:")
                 logger.info("=" * 60)
-                logger.info(response.text)
+                logger.info(complete_code)
                 logger.info("=" * 60)
                 
-                return response.text.strip()
+                return complete_code
             else:
                 logger.warning("⚠️ Empty response from chart formatter")
                 return None
