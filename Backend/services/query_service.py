@@ -38,7 +38,7 @@ class QueryService:
                 logger.info(f"👤 User ID: {user_id}")
             
             # Generate SQL using LLM service
-            sql_response = await llm_service.generate_sql_from_query(message)
+            sql_response = await llm_service.generate_sql_from_query(message, original_query=message)
             
             if sql_response:
                 logger.info(f"📝 Generated SQL response")

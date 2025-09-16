@@ -5,6 +5,7 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 from utils.sql_cleaner import SQLCleaner
 from services.sql_executor import SQLExecutor
+from services.chart_formatter import chart_formatter
 
 # Load environment variables
 load_dotenv()
@@ -113,7 +114,7 @@ Rules:
 7. Only return one query per request.
 8. Use standard PostgreSQL syntax."""
 
-    async def generate_sql_from_query(self, user_question: str) -> Optional[str]:
+    async def generate_sql_from_query(self, user_question: str, original_query: str = None) -> Optional[str]:
         """
         Convert natural language query to SQL using Gemini.
         
@@ -164,6 +165,10 @@ Rules:
                     logger.info("=" * 60)
                     logger.info(json_output)
                     logger.info("=" * 60)
+                    
+                    # Format chart data using the original user query
+                    if original_query:
+                        await chart_formatter.format_chart_data(original_query, formatted_results)
                     
                     # Return simple response to frontend
                     return "Thank you for your query"
