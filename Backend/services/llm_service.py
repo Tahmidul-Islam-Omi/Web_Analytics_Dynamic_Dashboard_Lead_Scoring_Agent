@@ -168,7 +168,10 @@ Rules:
                     
                     # Format chart data using the original user query
                     if original_query:
-                        await chart_formatter.format_chart_data(original_query, formatted_results)
+                        chart_info = await chart_formatter.format_chart_data(original_query, formatted_results)
+                        if chart_info:
+                            logger.info(f"📊 Chart Type: {chart_info['chart_type']}")
+                            logger.info("🎯 Ready for frontend chart rendering")
                     
                     # Return simple response to frontend
                     return "Thank you for your query"

@@ -74,35 +74,35 @@ datasetLabel: "Average View Duration (seconds) by Page"
         """Removes triple backticks and optional language tags (e.g., ```javascript)."""
         return llm_response.replace("```javascript", "").replace("```", "").strip()
     
-    def _add_helper_function(self, cleaned_response: str) -> str:
-        """Add the generateChartData helper function to the cleaned response."""
-        helper_function = """
-// Helper function to generate chart data from entries
-export const generateChartData = () => {
-return {
-labels: chartEntries.map(entry => entry.label),
-values: chartEntries.map(entry => entry.value),
-colors: {
-backgroundColor: chartEntries.map(entry => entry.color),
-hoverBackgroundColor: chartEntries.map(entry => entry.hoverColor),
-},
-label: chartConfig.datasetLabel
-};
-};"""
-        return cleaned_response + helper_function
+    def _extract_chart_type(self, user_query: str) -> str:
+        """Extract chart type from user query. Default to BarChart if not specified."""
+        query_lower = user_query.lower()
+        
+        if 'doughnutchart' in query_lower or 'doughnut' in query_lower:
+            return 'DoughnutChart'
+        elif 'linechart' in query_lower or 'line chart' in query_lower:
+            return 'LineChart'
+        elif 'scatterchart' in query_lower or 'scatter' in query_lower:
+            return 'ScatterChart'
+        else:
+            # Default to BarChart
+            return 'BarChart'
 
-    async def format_chart_data(self, user_query: str, sql_result: Dict[str, Any]) -> Optional[str]:
+    async def format_chart_data(self, user_query: str, sql_result: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
-        Format SQL results into chart-ready JavaScript code using LLM.
+        Format SQL results into chart-ready data and extract chart type.
         
         Args:
             user_query: Original user query from frontend
             sql_result: SQL execution results in JSON format
             
         Returns:
-            JavaScript code for chart data or None if failed
+            Dictionary with chart_type and chart_data or None if failed
         """
         try:
+            # Extract chart type from user query
+            chart_type = self._extract_chart_type(user_query)
+            
             # Convert SQL result to JSON string
             sql_result_json = json.dumps(sql_result, indent=2, default=str)
             
@@ -113,22 +113,25 @@ label: chartConfig.datasetLabel
             )
             
             logger.info(f"🎨 Formatting chart data for query: {user_query}")
+            logger.info(f"📊 Detected chart type: {chart_type}")
             
             # Generate chart formatting response
             response = self.model.generate_content(full_prompt)
             
             if response and response.text:
-                # Clean the response and add helper function
+                # Clean the response
                 cleaned_response = self._clean_code_block(response.text)
-                complete_code = self._add_helper_function(cleaned_response)
                 
                 logger.info("✅ Chart data formatted successfully")
-                logger.info("🎯 CHART-READY JAVASCRIPT CODE:")
+                logger.info("🎯 CHART DATA RESPONSE:")
                 logger.info("=" * 60)
-                logger.info(complete_code)
+                logger.info(cleaned_response)
                 logger.info("=" * 60)
                 
-                return complete_code
+                return {
+                    "chart_type": chart_type,
+                    "chart_data": cleaned_response
+                }
             else:
                 logger.warning("⚠️ Empty response from chart formatter")
                 return None
