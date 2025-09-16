@@ -3,6 +3,8 @@ import logging
 from typing import Optional
 import google.generativeai as genai
 from dotenv import load_dotenv
+from utils.sql_cleaner import SQLCleaner
+from services.sql_executor import SQLExecutor
 
 # Load environment variables
 load_dotenv()
@@ -119,7 +121,7 @@ Rules:
             user_question: Natural language question from user
             
         Returns:
-            Generated SQL query or error message
+            Clean, executable SQL query or error message
         """
         try:
             # Create the full prompt
@@ -131,8 +133,46 @@ Rules:
             response = self.model.generate_content(final_prompt)
             
             if response and response.text:
-                logger.info(f"✅ Generated SQL response")
-                return response.text.strip()
+                logger.info(f"✅ Generated raw SQL response")
+                
+                # Clean the SQL response
+                clean_sql = SQLCleaner.clean_sql_response(response.text)
+                
+                # Log the clean SQL to console
+                logger.info("=" * 60)
+                logger.info("🧹 CLEANED SQL:")
+                logger.info("=" * 60)
+                logger.info(f"{clean_sql}")
+                logger.info("=" * 60)
+                
+                # Validate SQL safety
+                is_safe = SQLCleaner.validate_sql_safety(clean_sql)
+                if is_safe:
+                    logger.info("✅ SQL SAFETY STATUS: SAFE - Query validated successfully")
+                    logger.info("=" * 60)
+                    
+                    # Execute the SQL query
+                    query_results = await SQLExecutor.execute_query(clean_sql)
+                    
+                    # Format results as JSON
+                    formatted_results = SQLExecutor.format_results_for_display(query_results)
+                    
+                    # Show JSON results in console
+                    import json
+                    json_output = json.dumps(formatted_results, indent=2, default=str)
+                    logger.info("🎯 QUERY RESULTS:")
+                    logger.info("=" * 60)
+                    logger.info(json_output)
+                    logger.info("=" * 60)
+                    
+                    # Return simple response to frontend
+                    return "Thank you for your query"
+                        
+                else:
+                    logger.warning("⚠️ SQL SAFETY STATUS: UNSAFE - Query failed safety validation")
+                    logger.info("=" * 60)
+                    return "Generated SQL contains potentially unsafe operations. Please rephrase your question."
+                    
             else:
                 logger.warning("⚠️ Empty response from Gemini")
                 return "Unable to generate SQL query. Please try rephrasing your question."
