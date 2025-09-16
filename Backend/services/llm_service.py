@@ -172,8 +172,11 @@ Rules:
                         if chart_info:
                             logger.info(f"📊 Chart Type: {chart_info['chart_type']}")
                             logger.info("🎯 Ready for frontend chart rendering")
+                            
+                            # Return chart data to frontend
+                            return chart_info
                     
-                    # Return simple response to frontend
+                    # Fallback if no chart formatting
                     return "Thank you for your query"
                         
                 else:

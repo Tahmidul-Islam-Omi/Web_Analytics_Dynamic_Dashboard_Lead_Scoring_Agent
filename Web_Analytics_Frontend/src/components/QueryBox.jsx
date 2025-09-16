@@ -14,11 +14,12 @@ import {
     Send,
     SmartToy
 } from '@mui/icons-material';
+import ChartRenderer from './ChartRenderer';
 
 const QueryBox = () => {
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
-    const [currentResponse, setCurrentResponse] = useState('');
+    const [currentResponse, setCurrentResponse] = useState(null);
 
     const quickQuestions = [
         { text: 'Find the top 5 pages by total number of page views. Show using DoughnutChart.' },
@@ -56,11 +57,28 @@ const QueryBox = () => {
             // Log the response for debugging
             console.log('Query API Response:', data);
 
-            setCurrentResponse(data.response || 'Thanks for your query');
+            // Check if response contains chart data
+            if (data.response && typeof data.response === 'object' && data.response.chart_type) {
+                // Handle chart response
+                setCurrentResponse({
+                    type: 'chart',
+                    chartType: data.response.chart_type,
+                    chartData: data.response.chart_data
+                });
+            } else {
+                // Handle text response
+                setCurrentResponse({
+                    type: 'text',
+                    content: data.response || 'Thanks for your query'
+                });
+            }
 
         } catch (error) {
             console.error('Error submitting query:', error);
-            setCurrentResponse('Sorry, I encountered an error processing your request. Please try again.');
+            setCurrentResponse({
+                type: 'text',
+                content: 'Sorry, I encountered an error processing your request. Please try again.'
+            });
         } finally {
             setIsTyping(false);
         }
@@ -173,16 +191,25 @@ const QueryBox = () => {
                                 </Typography>
                             </Box>
                         ) : (
-                            <Typography
-                                variant="body1"
-                                sx={{
-                                    whiteSpace: 'pre-line',
-                                    wordBreak: 'break-word',
-                                    lineHeight: 1.6
-                                }}
-                            >
-                                {currentResponse}
-                            </Typography>
+                            <Box sx={{ width: '100%' }}>
+                                {currentResponse.type === 'chart' ? (
+                                    <ChartRenderer
+                                        chartType={currentResponse.chartType}
+                                        chartData={currentResponse.chartData}
+                                    />
+                                ) : (
+                                    <Typography
+                                        variant="body1"
+                                        sx={{
+                                            whiteSpace: 'pre-line',
+                                            wordBreak: 'break-word',
+                                            lineHeight: 1.6
+                                        }}
+                                    >
+                                        {currentResponse.content}
+                                    </Typography>
+                                )}
+                            </Box>
                         )}
                     </Paper>
                 )}

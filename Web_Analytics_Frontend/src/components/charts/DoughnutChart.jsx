@@ -7,7 +7,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const DoughnutChart = ({ chartEntries, chartConfig }) => {
   console.log("DoughnutChart component is rendering");
-  
+
   const chartData = generateChartData(chartEntries, chartConfig);
   const rawData = chartData.values;
   const total = rawData.reduce((sum, value) => sum + value, 0);

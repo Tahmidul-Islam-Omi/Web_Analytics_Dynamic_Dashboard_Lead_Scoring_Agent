@@ -15,10 +15,12 @@ class QueryRequest(BaseModel):
     site_id: Optional[str] = None
     user_id: Optional[str] = None
 
+from typing import Union
+
 class QueryResponse(BaseModel):
     success: bool
     message: str
-    response: Optional[str] = None
+    response: Optional[Union[str, Dict[str, Any]]] = None
 
 @router.post("/search", response_model=QueryResponse)
 async def handle_search_query(request: QueryRequest):
