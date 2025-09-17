@@ -48,6 +48,16 @@ const BarChart = ({ chartEntries, chartConfig }) => {
       title: {
         display: true,
         text: chartData.label,
+        position: 'top',
+        padding: {
+          top: 10,
+          bottom: 20,
+        },
+        font: {
+          size: 18,
+          weight: 'bold',
+          family: 'Roboto'
+        },
       },
     },
     scales: {
@@ -58,7 +68,7 @@ const BarChart = ({ chartEntries, chartConfig }) => {
   };
 
   return (
-    <div style={{ width: '100%', height: '400px' }}>
+    <div style={{ width: '100%', height: '500px' }}>
       <Bar data={data} options={options} />
     </div>
   );
